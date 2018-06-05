@@ -34,6 +34,6 @@ void ANO_DT_Send_Power(u16 votage, u16 current);
 void ANO_DT_Send_MotoPWM(u16 m_1,u16 m_2,u16 m_3,u16 m_4,u16 m_5,u16 m_6,u16 m_7,u16 m_8);
 void ANO_DT_Send_PID(u8 group,float p1_p,float p1_i,float p1_d,float p2_p,float p2_i,float p2_d,float p3_p,float p3_i,float p3_d);
 void ANO_DT_SENSER2(int32_t ALT_BAR, uint16_t ALT_CSB);
-
+void ANO_DT_Data_Receive_Prepare(u8 data);
 #endif
 

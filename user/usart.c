@@ -8,7 +8,7 @@ USART传输数据或者打印数据
 	printf("vvvv");
 *************************************************************************/
 #include "usart.h"
-
+#include "GroundStation.h"
 
 /***********************************************************************
 移植代码修改区
@@ -55,8 +55,9 @@ void USART_Config(void)
 	USART_initStructure.USART_Parity = USART_Parity_No;
 	USART_initStructure.USART_StopBits = USART_StopBits_1;
 	USART_initStructure.USART_WordLength = USART_WordLength_8b;
+    
 	USART_Init(USART,&USART_initStructure);
-	
+	USART_ITConfig(USART, USART_IT_RXNE, ENABLE);//开启串口接受中断
 	USART_Cmd(USART,ENABLE);
 	
 }	
@@ -69,5 +70,12 @@ int fputc(int ch,FILE *f)
 	return ch;
 }
 
-
+void USART3_IRQHandler(void){  
+      unsigned char RxData;  
+      if (USART_GetITStatus(USART, USART_IT_RXNE) != RESET) {  
+            USART_ClearITPendingBit(USART1, USART_IT_RXNE);  
+            RxData=USART_ReceiveData(USART1);   
+            ANO_DT_Data_Receive_Prepare(RxData); 
+      }  
+} 
 

@@ -20,7 +20,7 @@ float PID_Postion_Cal( PID_DATA *data)
 {
     char Index = 0;
 
-    data->error  = data->Input + data->Desire  - data->Measure  +  data->correct  ;     //Y轴（横滚）角度环控制
+    data->error  = data->Input + data->Desire  - data->Measure  +  data->correct  ;     
     data->Diff =  data->error -  data->lastError;     //误差的微分
     if(myabs(data->error) < data->IntDifZone) Index = 1;    //积分分离
     else  Index = 0;
