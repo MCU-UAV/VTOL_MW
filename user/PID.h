@@ -5,7 +5,7 @@
 #include "imuAPI.h"
 #include "control.h"
 float PID_Postion_Cal( PID_DATA *data);
-void PID_Set(PID_DATA *data,float Input,float Measure,float Desire, float IntDifZone,float OutLim);
+void PID_Set(PID_DATA *data, float Input, float Desire, float Measure, float IntDifZone, float Integral_max,float OutLim);
 void parameterInit(void);
 
 

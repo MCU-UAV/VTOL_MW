@@ -3,13 +3,13 @@
 PID控制核心算法
 ******************************************************************/
 #include "stm32f10x.h"
+#include "control.h"
 
 #include "usart.h"
 #include "i2c_soft.h"
 #include "nvic.h"
 #include "pwm.h"
 #include "systick.h"
-#include "control.h"
 #include "queue.h"
 #include "filter.h"
 #include "rc.h"
@@ -34,6 +34,7 @@ vs16 PWM1, PWM2, PWM3, PWM4;
 vs16 lastPWM3, lastPWM4;
 
 float Debug_temp;
+float yaw_desire;
 
 IMUdata ang;
 IMUdata gyro;
@@ -108,12 +109,18 @@ void Control(void)  //200HZ
             //外环PID计算
 
             //ROLL 外环 Y轴
-            PID_Set(&(roll.outer), limf( (CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, ang.Y, 5.0, 1000.0);
+            PID_Set(&(roll.outer), limf( (CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, ang.Y, 5.0,45.0 ,1000.0);
             roll.outer.Output = PID_Postion_Cal(&(roll.outer));
             //PITCH 外环 X轴
-            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 90, ang.X, 5.0, 1000.0);
+            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 90, ang.X, 5.0,45.0, 1000.0);
             pitch.outer.Output = PID_Postion_Cal(&(pitch.outer));
-            //  yaw.outer.Output = PID_Postion_Cal(&(yaw.outer), (CHdata[RUD] - remote_normal_value),ang.Z, -90, angle_max);
+            //YAW 外环
+            PID_Set(&(yaw.outer),yaw_desire,0, ang.Z, 5.0,45.0 , 500.0);
+            yaw.outer.Output = PID_Postion_Cal(&(yaw.outer));
+            yaw_desire += (-(CHdata[RUD] - remote_normal_value) / 2.5) * 0.005;
+            if(yaw_desire >= 180) yaw_desire -=360;
+            
+            else if(yaw_desire <= 180) yaw_desire +=360;
             if(FlightMode == AltHold)
             {
             getAddData(&add); //得到气压、气压高度、GPS相关数据
@@ -142,14 +149,15 @@ void Control(void)  //200HZ
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //内环PID  200HZ
 
-    PID_Set(&(roll.inner), roll.outer.Output, 0, gyro.Z, 50.0, 1000.0); //ROLL 内环 Z轴
+    PID_Set(&(roll.inner), roll.outer.Output, 0, gyro.Z, 50.0,200.0, 1000.0); //ROLL 内环 Z轴
     roll.inner.Output = PID_Postion_Cal(&(roll.inner));
 
-    PID_Set(&(pitch.inner), pitch.outer.Output, 0, gyro.X, 50.0, 1000.0); //PITCH 内环 X轴
+    PID_Set(&(pitch.inner), pitch.outer.Output, 0, gyro.X, 50.0,200.0 ,1000.0); //PITCH 内环 X轴
     pitch.inner.Output = PID_Postion_Cal(&(pitch.inner));
 
-    PID_Set(&(yaw.inner), -(CHdata[RUD] - remote_normal_value) / 2.5, 0, gyro.Y, 50.0, 1000.0); //YAW 内环 Y轴
+    PID_Set(&(yaw.inner), yaw.outer.Output,0, gyro.Y, 50.0, 200.0 ,1000.0); //YAW 内环 Y轴
     yaw.inner.Output = PID_Postion_Cal(&(yaw.inner));
+     
 
 
 

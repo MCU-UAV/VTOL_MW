@@ -50,3 +50,15 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+VTOL_MW.uvguix.HASEE
+Objects/VTOL_MW_Target 1.dep
+*.dep
+*.crf
+*.crf
+Objects/main.crf
+VTOL_MW.uvguix.HASEE
+Objects/dmp_0.build_log.htm
+Objects/groundstation.crf
+Objects/main.crf
+Objects/nvic.crf
+*.crf

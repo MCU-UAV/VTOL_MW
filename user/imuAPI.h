@@ -160,6 +160,7 @@ void getQuad(QuadNum *qq);
 void Quad2Angle(QuadNum qq,IMUdata *aa);
 float getNormAccZ(QuadNum qq,IMUdata acc);
 float getGravityAcc(void);
+float getYawToward(void);
 void getAddData(AddData *add);
 void getGyro(IMUdata *gg);
 void getMag(IMUdata *mm);

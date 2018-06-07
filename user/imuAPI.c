@@ -195,6 +195,24 @@ float getGravityAcc(void)
     return medAcc;
       
 }
+
+float getYawToward(void)
+{
+    float medYaw = 0;
+    IMUdata ang;
+    QuadNum qq;
+    uint8_t i;
+    for(i=0;i<200;i++)
+    {
+        getQuad (&qq);   //由模块读出的四元数，解算为角度，较灵活，以防万向轴死锁
+        Quad2Angle(qq, &ang);
+        medYaw +=  ang.Z;
+        delay_ms(1);  //延时1毫秒，保证数据的平均性
+    }
+     medYaw /= 200.0;
+    return  medYaw;
+    
+}
 //8.
 //功能：iic连续读取获得所有附加数据
 //参数：结构体指针

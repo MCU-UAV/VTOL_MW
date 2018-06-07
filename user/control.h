@@ -40,6 +40,7 @@ typedef struct DATA
     float Measure; //测量值
     float Desire;  //期望
     float IntDifZone;
+    float Integral_max;
     float OutLim;
   
 
@@ -75,6 +76,7 @@ extern struct PITCH pitch;
 extern struct ROLL roll;
 extern struct YAW yaw;
 extern vu8 loop_cnt;
+extern float yaw_desire;
 
 extern float Debug_temp;
 void PIDinit(void);
