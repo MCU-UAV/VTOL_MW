@@ -223,20 +223,26 @@ void getAddData(AddData *add)
 
     add->Pressure  = ((uint32_t )temp[3] << 24) | ((uint32_t )temp[2] << 16) | ((uint32_t )temp[1] << 8) | temp[0];  //Pa
     add->PreHeight  = (int32_t )(((int32_t )temp[7] << 24) | ((int32_t )temp[6] << 16) | ((int32_t )temp[5] << 8) | temp[4]);  //cm
-
-    add->Lon.minute =  (double)(((uint32_t )temp[11] << 24) | ((uint32_t )temp[10] << 16) | ((uint32_t )temp[9] << 8) | temp[8]) / 10000000.0;
-    add->Lon.second = (double)(((((uint32_t )temp[11] << 24) | ((uint32_t )temp[10] << 16) | ((uint32_t )temp[9] << 8) | temp[8])) % 10000000) / 100000.0;
-    add->Lat.minute =  (double)(((uint32_t )temp[15] << 24) | ((uint32_t )temp[14] << 16) | ((uint32_t )temp[13] << 8) | temp[12]) / 10000000.0;
-    add->Lat.second = (double)(((((uint32_t )temp[15] << 24) | ((uint32_t )temp[14] << 16) | ((uint32_t )temp[13] << 8) | temp[12])) % 10000000) / 100000.0;
+    //ddmm.mmmmm dd为度，mm为分
+    add->Lat_32 = ((uint32_t )temp[11] << 24) | ((uint32_t )temp[10] << 16) | ((uint32_t )temp[9] << 8) | temp[8];
+    add->Lon.minute =  (double)(add->Lat_32) / 10000000.0;
+    add->Lon.second = (double)((add->Lat_32) % 10000000) / 100000.0;
+    add->Lat_32 = ((uint32_t )temp[15] << 24) | ((uint32_t )temp[14] << 16) | ((uint32_t )temp[13] << 8) | temp[12];
+    add->Lat.minute =  (double)(add->Lat_32) / 10000000.0;
+    add->Lat.second = (double)((add->Lat_32) % 10000000) / 100000.0;
     add->GPSheight  = (float)(((uint16_t)temp[17] << 8) | temp[16]) / 10;
     add->GPSYaw = (float)(((uint16_t)temp[19] << 8) | temp[18]) / 10;
+    //GPS速度
     add->GPSV = (float)(((uint32_t )temp[23] << 24) | ((uint32_t )temp[22] << 16) | ((uint32_t )temp[21] << 8) | temp[20]) / 1000.0;
 
     MoniI2c_ReadSomeDataFromSlave(IMUREADADDR, SVNUM, 8, temp);
-
+    //卫星数
     add->SN = ((uint16_t)temp[1] << 8) | temp[0];
+    //位置定位精度
     add->GPS_PDOP = (float)(((uint16_t)temp[3] << 8) | temp[2]) / 100.0;
+    //水平定位精度
     add->GPS_HDOP = (float)(((uint16_t)temp[5] << 8) | temp[4]) / 10.0;
+    //垂直定位精度
     add->GPS_VDOP = (float)(((uint16_t)temp[7] << 8) | temp[6]) / 10.0;
 }
 

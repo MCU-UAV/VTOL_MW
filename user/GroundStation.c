@@ -1,4 +1,4 @@
-
+//协议版本5.0 地面站版本5.1
 /**************************************************************************
 将数据上报给上位机。将要发送给上位机的数据进行打包，然后利用串口将数据发送出去
 *************************************************************************/
@@ -44,22 +44,31 @@ void ANO_DT_Data_Exchange(void)
 	static u8 status_cnt 	= 15;
 	static u8 rcdata_cnt 	= 20;
 	static u8 motopwm_cnt	= 20;
+    static u8 alt_cnt      = 25;
+    static u8 gps_cnt = 40;
 	static u8 power_cnt		= 50;
-	
-	if((cnt % senser_cnt) == (senser_cnt-1))
+	//输出陀螺仪、加速计、电子罗盘各轴数据，以及roll,pitch，垂直方向的速度
+	if((cnt % senser_cnt) == (senser_cnt-1))  
 		f.send_senser = 1;	
-	
+	//输出pitch,roll,yaw三轴的角度，所使用的高度，飞行模式，飞控状态
 	if((cnt % status_cnt) == (status_cnt-1))
 		f.send_status = 1;	
-	
+	//输出遥控器各通道数据
 	if((cnt % rcdata_cnt) == (rcdata_cnt-1))
 		f.send_rcdata = 1;	
-	
+	//输出电机各通道数据
 	if((cnt % motopwm_cnt) == (motopwm_cnt-1))
 		f.send_motopwm = 1;	
-	
+	//输出电压、电流
 	if((cnt % power_cnt) == (power_cnt-1))
-		f.send_power = 1;		
+		f.send_power = 1;	
+    //输出气压计高度，附加传感器高度
+    if((cnt % alt_cnt) == (alt_cnt-1))
+		f.send_alt = 1;	
+      
+     //输出GPS数据
+    if((cnt % gps_cnt) == (gps_cnt-1))
+		f.send_gps = 1;	
 	
 	cnt++;
     cnt %= power_cnt; //保证其不溢出
@@ -81,7 +90,8 @@ void ANO_DT_Data_Exchange(void)
 	{
 		f.send_senser = 0;
         //void ANO_DT_Send_Senser(s16 a_x,s16 a_y,s16 a_z,s16 g_x,s16 g_y,s16 g_z,s16 m_x,s16 m_y,s16 m_z,s32 bar)
-		ANO_DT_Send_Senser(acc.X,acc.Y,acc.Z,gyro.X,gyro.Y,gyro.Z,mag.X,mag.Y,mag.Z,0);
+		ANO_DT_Send_Senser(acc.X,acc.Y,acc.Z,gyro.X,gyro.Y,gyro.Z,mag.X,mag.Y,mag.Z);
+        ANO_DT_SPEED(0,0,barAltHoldRate.Measure);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_rcdata)
@@ -98,11 +108,15 @@ void ANO_DT_Data_Exchange(void)
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_power)
 	{
-        f.send_power = 0;
-        ANO_DT_SENSER2(add.Pressure, 0);
+        f.send_power = 0;      
 		
-//		ANO_DT_Send_Power(123,456);
+    	ANO_DT_Send_Power(123,456);
 	}
+    else if(f.send_alt)
+    {
+        f.send_alt = 0;
+        ANO_DT_SENSER2(add.PreHeight, 0);
+    }
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid1)
 	{
@@ -128,7 +142,12 @@ void ANO_DT_Data_Exchange(void)
 							5,5,5);
 	}
 	
-	//Usb_Hid_Send();					
+//////////////////////////////////////////////////////////////////////////////////////////
+    else if(f.send_pid3)
+	{
+		f.send_gps = 0;
+        Data_Send_GpsData();
+    }        
 }
 
 
@@ -419,7 +438,7 @@ void ANO_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 a
 /*************************************************************
 发送陀螺仪和加速计的原始数据给上位机
 **************************************************************/
-void ANO_DT_Send_Senser(s16 a_x,s16 a_y,s16 a_z,s16 g_x,s16 g_y,s16 g_z,s16 m_x,s16 m_y,s16 m_z,s32 bar)
+void ANO_DT_Send_Senser(s16 a_x,s16 a_y,s16 a_z,s16 g_x,s16 g_y,s16 g_z,s16 m_x,s16 m_y,s16 m_z)
 {
 	u8 _cnt=0;
 	vs16 _temp;
@@ -516,63 +535,81 @@ void ANO_DT_Send_RCData(u16 thr,u16 yaw,u16 rol,u16 pit,u16 aux1,u16 aux2,u16 au
 	ANO_DT_Send_Data(data_to_send, _cnt);
 }
 
+/*************************************************************
+发送GPS的数据给上位机
+**************************************************************/
+void Data_Send_GpsData(void)
+{
+	u8 _cnt=0;
+    u8 sum = 0;
+    u8 i;
+    vs16 _temp;
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0x04;
+	data_to_send[_cnt++]=0;
+	data_to_send[_cnt++]=BYTE3(add.Lat_32);
+	data_to_send[_cnt++]=BYTE2(add.Lat_32);
+	data_to_send[_cnt++]=BYTE1(add.Lat_32);
+	data_to_send[_cnt++]=BYTE0(add.Lat_32);
+	data_to_send[_cnt++]=BYTE3(add.Lon_32);
+	data_to_send[_cnt++]=BYTE2(add.Lon_32);
+	data_to_send[_cnt++]=BYTE1(add.Lon_32);
+	data_to_send[_cnt++]=BYTE0(add.Lon_32);
+	data_to_send[_cnt++]=BYTE3(add.GPSheight);
+	data_to_send[_cnt++]=BYTE2(add.GPSheight);
+	data_to_send[_cnt++]=BYTE1(add.GPSheight);
+	data_to_send[_cnt++]=BYTE0(add.GPSheight);
+	data_to_send[_cnt++]=BYTE3(add.GPSV);
+	data_to_send[_cnt++]=BYTE2(add.GPSV);
+	data_to_send[_cnt++]=BYTE1(add.GPSV);
+	data_to_send[_cnt++]=BYTE0(add.GPSV);
+	_temp = add.GPS_VDOP*100; //垂直精度
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = add.GPS_HDOP*100;  //水平精度
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	data_to_send[_cnt++]=add.GPSFixSta;
+	data_to_send[_cnt++]=add.SN; //卫星数量
+	
+	data_to_send[3] = _cnt-4;
+	
+	
+	for(i=0;i<_cnt;i++)
+		sum += data_to_send[i];
+	
+	data_to_send[_cnt++]=sum;
+	
+ANO_DT_Send_Data(data_to_send, _cnt);
 
+}
 
 /*************************************************************
 发送电源的电压和电流数据给上位机
 **************************************************************/
-//void ANO_DT_Send_Power(u16 votage, u16 current)
-//{
-//	u8 _cnt=0;
-//	u16 temp;
-//	
-//	data_to_send[_cnt++]=0xAA;
-//	data_to_send[_cnt++]=0xAA;
-//	data_to_send[_cnt++]=0x05;
-//	data_to_send[_cnt++]=0;
-//	
-//	temp = votage;
-//	data_to_send[_cnt++]=BYTE1(temp);
-//	data_to_send[_cnt++]=BYTE0(temp);
-//	temp = current;
-//	data_to_send[_cnt++]=BYTE1(temp);
-//	data_to_send[_cnt++]=BYTE0(temp);
-//	
-//	data_to_send[3] = _cnt-4;
-//	
-//	u8 sum = 0;
-//	for(u8 i=0;i<_cnt;i++)
-//		sum += data_to_send[i];
-//	
-//	data_to_send[_cnt++]=sum;
-//	
-//	ANO_DT_Send_Data(data_to_send, _cnt);
-//}
-void ANO_DT_SENSER2(int32_t ALT_BAR, uint16_t ALT_CSB)
+void ANO_DT_Send_Power(u16 votage, u16 current)
 {
 	u8 _cnt=0;
 	u16 temp;
-    vs32 _temp2 = ALT_BAR;
 	u8 sum = 0;
     u8 i;
-    
 	data_to_send[_cnt++]=0xAA;
 	data_to_send[_cnt++]=0xAA;
-	data_to_send[_cnt++]=0x07;
+	data_to_send[_cnt++]=0x05;
 	data_to_send[_cnt++]=0;
-
-    data_to_send[_cnt++]=BYTE3(_temp2);
-    data_to_send[_cnt++]=BYTE2(_temp2);
-	data_to_send[_cnt++]=BYTE1(_temp2);
-	data_to_send[_cnt++]=BYTE0(_temp2);
-	temp = ALT_CSB;
+	
+	temp = votage;
+	data_to_send[_cnt++]=BYTE1(temp);
+	data_to_send[_cnt++]=BYTE0(temp);
+	temp = current;
 	data_to_send[_cnt++]=BYTE1(temp);
 	data_to_send[_cnt++]=BYTE0(temp);
 	
 	data_to_send[3] = _cnt-4;
 	
 	
-	for( i=0;i<_cnt;i++)
+	for(i=0;i<_cnt;i++)
 		sum += data_to_send[i];
 	
 	data_to_send[_cnt++]=sum;
@@ -621,10 +658,49 @@ void ANO_DT_Send_MotoPWM(u16 m_1,u16 m_2,u16 m_3,u16 m_4,u16 m_5,u16 m_6,u16 m_7
 	ANO_DT_Send_Data(data_to_send, _cnt);
 }
 
+/*************************************************************
+发送气压高度和附加高度
+**************************************************************/
+void ANO_DT_SENSER2(int32_t ALT_BAR, int32_t ALT_ADD)
+{
+	u8 _cnt=0;
+	
+    int32_t _temp = ALT_BAR;
+	u8 sum = 0;
+    u8 i;
+    
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0x07;
+	data_to_send[_cnt++]=0;
+
+    data_to_send[_cnt++]=BYTE3(_temp);
+    data_to_send[_cnt++]=BYTE2(_temp);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = ALT_ADD;
+	data_to_send[_cnt++]=BYTE3(_temp);
+    data_to_send[_cnt++]=BYTE2(_temp);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	
+	data_to_send[3] = _cnt-4;
+	
+	
+	for( i=0;i<_cnt;i++)
+		sum += data_to_send[i];
+	
+	data_to_send[_cnt++]=sum;
+	
+	ANO_DT_Send_Data(data_to_send, _cnt);
+}
+
+
 
 /*************************************************************
 发送PID数据给上位机
 **************************************************************/
+
 void ANO_DT_Send_PID(u8 group,float p1_p,float p1_i,float p1_d,float p2_p,float p2_i,float p2_d,float p3_p,float p3_i,float p3_d)
 {
 	u8 _cnt=0;
@@ -676,5 +752,44 @@ void ANO_DT_Send_PID(u8 group,float p1_p,float p1_i,float p1_d,float p2_p,float 
 
 	ANO_DT_Send_Data(data_to_send, _cnt);
 }
+
+
+/*************************************************************
+发送无人机的速度
+**************************************************************/
+void ANO_DT_SPEED(int16_t SPEED_ROLL, int16_t SPEED_PITCH,int16_t SPEED_Z)
+{
+	u8 _cnt=0;
+	vs16 temp=SPEED_ROLL;
+	u8 sum = 0;
+    u8 i;
+    
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0x0B;
+	data_to_send[_cnt++]=0;
+
+	data_to_send[_cnt++]=BYTE1(temp);
+	data_to_send[_cnt++]=BYTE0(temp);
+	temp = SPEED_PITCH;
+	data_to_send[_cnt++]=BYTE1(temp);
+	data_to_send[_cnt++]=BYTE0(temp);
+    
+    temp = SPEED_Z;
+	data_to_send[_cnt++]=BYTE1(temp);
+	data_to_send[_cnt++]=BYTE0(temp);
+	
+	data_to_send[3] = _cnt-4;
+	
+	
+	for( i=0;i<_cnt;i++)
+		sum += data_to_send[i];
+	
+	data_to_send[_cnt++]=sum;
+	
+	ANO_DT_Send_Data(data_to_send, _cnt);
+}
+
+
 
 

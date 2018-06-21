@@ -141,6 +141,7 @@ typedef struct Time
 typedef struct addData
 {
  	DegreeUnit Lon,Lat;
+    vs32 Lon_32,Lat_32;
 	float GPSheight;
 	float GPSYaw;
 	float GPSV;
@@ -148,6 +149,7 @@ typedef struct addData
     float GPS_PDOP;    //位置定位精度
     float GPS_HDOP;     //水平定位精度
     float GPS_VDOP;    //垂直定位精度
+    uint8_t GPSFixSta;
 	float Pressure;
 	float PreHeight;
 }AddData;
