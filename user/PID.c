@@ -55,27 +55,27 @@ void parameterInit()
     pitch.outer.Output = 0;
     roll.outer.Output = 0;
     yaw.outer.Output = 0;
-
-    pitch.inner.P  = 5.0f;   //40.00
-    pitch.inner.I = 0.0f;
-    pitch.inner.D = 10.0f;
-
-    pitch.outer.P = 10.0f;    //1.0
-    pitch.outer.I = 0.01f;
-    pitch.outer.D = 20.0f;
-
+    
     roll.inner.P = 2.5f;   //1.5
     roll.inner.I = 0.0f;
     roll.inner.D = 1.5f;  //40.0
 
-    roll.outer.P = -2.5f;  //-2.0
-    roll.outer.I = -0.0f;   //-0.01
-    roll.outer.D = -2.0f;  //0.0
-
-
+    pitch.inner.P  = 5.0f;   //40.00
+    pitch.inner.I = 0.0f;
+    pitch.inner.D = 10.0f;
+    
     yaw.inner.P = 10.0f;
     yaw.inner.I = 0.0f;
     yaw.inner.D = 5.0f;
+
+    roll.outer.P = 2.5f;  //-2.0
+    roll.outer.I = 0.0f;   //-0.01
+    roll.outer.D = 2.0f;  //0.0
+    
+    pitch.outer.P = 10.0f;    //1.0
+    pitch.outer.I = 0.01f;
+    pitch.outer.D = 20.0f;
+  
 
     yaw.outer.P = 0.0f;
     yaw.outer.I = 0.0f;

@@ -77,8 +77,8 @@ int main(void)
  
 	while(1)
     {
-        for(i=  0;i<100;i++)
-            for(j = 0;j<100;j++);
+        
+          delay_ms(10);
         /***地面站数据***/
             ANO_DT_Data_Exchange(); //地面站数据发送/接收
         /***基础数据***/

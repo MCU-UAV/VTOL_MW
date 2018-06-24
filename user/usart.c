@@ -73,8 +73,8 @@ int fputc(int ch,FILE *f)
 void USART3_IRQHandler(void){  
       unsigned char RxData;  
       if (USART_GetITStatus(USART, USART_IT_RXNE) != RESET) {  
-            USART_ClearITPendingBit(USART1, USART_IT_RXNE);  
-            RxData=USART_ReceiveData(USART1);   
+            USART_ClearITPendingBit(USART, USART_IT_RXNE);  
+            RxData=USART_ReceiveData(USART);   
             ANO_DT_Data_Receive_Prepare(RxData); 
       }  
 } 

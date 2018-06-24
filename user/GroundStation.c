@@ -78,6 +78,30 @@ void ANO_DT_Data_Exchange(void)
 //		f.send_version = 0;
 //		ANO_DT_Send_Version(4,300,100,400,0);
 	}
+    /////////////////////////////////////////////////////////////////////////////////////
+	else if(f.send_pid1)
+	{
+		f.send_pid1 = 0;
+		ANO_DT_Send_PID(1,roll.inner.P,roll.inner.I,roll.inner.D,
+						   pitch.inner.P,pitch.inner.I,pitch.inner.D,
+							yaw.inner.P,yaw.inner.I,yaw.inner.D);
+	}	
+/////////////////////////////////////////////////////////////////////////////////////
+	else if(f.send_pid2)
+	{
+		f.send_pid2 = 0;
+		ANO_DT_Send_PID(2,roll.outer.P,roll.outer.I,roll.outer.D,
+						   pitch.outer.P,pitch.outer.I,pitch.outer.D,
+							yaw.outer.P,yaw.outer.I,yaw.outer.D);
+	}
+/////////////////////////////////////////////////////////////////////////////////////
+	else if(f.send_pid3)
+	{
+		f.send_pid3 = 0;
+		ANO_DT_Send_PID(3,barAltHoldHeight.P,barAltHoldHeight.I,barAltHoldHeight.D,
+							barAltHoldRate.P,barAltHoldRate.I,barAltHoldRate.D,
+							5,5,5);
+	}
 /////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_status)
 	{
@@ -117,33 +141,10 @@ void ANO_DT_Data_Exchange(void)
         f.send_alt = 0;
         ANO_DT_SENSER2(add.PreHeight, 0);
     }
-/////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_pid1)
-	{
-		f.send_pid1 = 0;
-		ANO_DT_Send_PID(1,pitch.inner.P,pitch.inner.I,pitch.inner.D,
-						   roll.inner.P,roll.inner.I,roll.inner.D,
-							yaw.inner.P,yaw.inner.I,yaw.inner.D);
-	}	
-/////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_pid2)
-	{
-		f.send_pid2 = 0;
-		ANO_DT_Send_PID(2,pitch.outer.P,pitch.outer.I,pitch.outer.D,
-						   roll.outer.P,roll.outer.I,roll.outer.D,
-							yaw.outer.P,yaw.outer.I,yaw.outer.D);
-	}
-/////////////////////////////////////////////////////////////////////////////////////
-	else if(f.send_pid3)
-	{
-		f.send_pid3 = 0;
-		ANO_DT_Send_PID(3,barAltHoldHeight.P,barAltHoldHeight.I,barAltHoldHeight.D,
-							barAltHoldRate.P,barAltHoldRate.I,barAltHoldRate.D,
-							5,5,5);
-	}
+
 	
 //////////////////////////////////////////////////////////////////////////////////////////
-    else if(f.send_pid3)
+    else if(f.send_gps)
 	{
 		f.send_gps = 0;
         Data_Send_GpsData();
@@ -294,13 +295,13 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 
 	if(*(data_buf+2)==0X10)								//PID1 ×ËÌ¬ÄÚ»·
     {
-        pitch.inner.P  = 0.001*( (vs16)(*(data_buf+4)<<8)|*(data_buf+5) );
-        pitch.inner.I  = 0.001*( (vs16)(*(data_buf+6)<<8)|*(data_buf+7) );
-        pitch.inner.D  = 0.001*( (vs16)(*(data_buf+8)<<8)|*(data_buf+9) );
+        roll.inner.P  = 0.001*( (vs16)(*(data_buf+4)<<8)|*(data_buf+5) );
+        roll.inner.I  = 0.001*( (vs16)(*(data_buf+6)<<8)|*(data_buf+7) );
+        roll.inner.D  = 0.001*( (vs16)(*(data_buf+8)<<8)|*(data_buf+9) );
         
-        roll.inner.P = 0.001*( (vs16)(*(data_buf+10)<<8)|*(data_buf+11) );
-        roll.inner.I = 0.001*( (vs16)(*(data_buf+12)<<8)|*(data_buf+13) );
-        roll.inner.D = 0.001*( (vs16)(*(data_buf+14)<<8)|*(data_buf+15) );
+        pitch.inner.P = 0.001*( (vs16)(*(data_buf+10)<<8)|*(data_buf+11) );
+        pitch.inner.I = 0.001*( (vs16)(*(data_buf+12)<<8)|*(data_buf+13) );
+        pitch.inner.D = 0.001*( (vs16)(*(data_buf+14)<<8)|*(data_buf+15) );
         
         yaw.inner.P 	= 0.001*( (vs16)(*(data_buf+16)<<8)|*(data_buf+17) );
         yaw.inner.I 	= 0.001*( (vs16)(*(data_buf+18)<<8)|*(data_buf+19) );
@@ -310,13 +311,13 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
     }
     if(*(data_buf+2)==0X11)								//PID2
     {
-        pitch.outer.P  = 0.001*( (vs16)(*(data_buf+4)<<8)|*(data_buf+5) );
-        pitch.outer.I  = 0.001*( (vs16)(*(data_buf+6)<<8)|*(data_buf+7) );
-        pitch.outer.D  = 0.001*( (vs16)(*(data_buf+8)<<8)|*(data_buf+9) );
+        roll.outer.P  = 0.001*( (vs16)(*(data_buf+4)<<8)|*(data_buf+5) );
+        roll.outer.I  = 0.001*( (vs16)(*(data_buf+6)<<8)|*(data_buf+7) );
+        roll.outer.D  = 0.001*( (vs16)(*(data_buf+8)<<8)|*(data_buf+9) );
         
-        roll.outer.P = 0.001*( (vs16)(*(data_buf+10)<<8)|*(data_buf+11) );
-        roll.outer.I = 0.001*( (vs16)(*(data_buf+12)<<8)|*(data_buf+13) );
-        roll.outer.D = 0.001*( (vs16)(*(data_buf+14)<<8)|*(data_buf+15) );
+        pitch.outer.P = 0.001*( (vs16)(*(data_buf+10)<<8)|*(data_buf+11) );
+        pitch.outer.I = 0.001*( (vs16)(*(data_buf+12)<<8)|*(data_buf+13) );
+        pitch.outer.D = 0.001*( (vs16)(*(data_buf+14)<<8)|*(data_buf+15) );
         
         yaw.outer.P 	= 0.001*( (vs16)(*(data_buf+16)<<8)|*(data_buf+17) );
         yaw.outer.I 	= 0.001*( (vs16)(*(data_buf+18)<<8)|*(data_buf+19) );
