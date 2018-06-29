@@ -105,8 +105,8 @@ void parameterInit()
    
    // yaw_desire=getYawToward(); //得到当前朝向角度
     
-    setOpenGPS();
-    setGPSBaud(9600);
+    setOpenGPS(); //设置模块打开GPS
+    setGPSBaud(9600);  //设置模块与GPS的通信波特率
    
 
 }

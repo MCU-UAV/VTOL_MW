@@ -30,7 +30,7 @@
 // GPS SCL 橙色 CDA 黄色 TX 白色 RX 绿色
 int main(void)
 {
-   uint16_t i,j;
+  
    //串口初始化
 	USART_Config();
 	printf("usart is ready\r\n");

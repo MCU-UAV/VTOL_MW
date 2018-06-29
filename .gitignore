@@ -51,14 +51,14 @@ Module.symvers
 Mkfile.old
 dkms.conf
 VTOL_MW.uvguix.HASEE
-Objects/VTOL_MW_Target 1.dep
 *.dep
 *.crf
 *.crf
-Objects/main.crf
+/Objects/*
+/RTE/*
 VTOL_MW.uvguix.HASEE
-Objects/dmp_0.build_log.htm
-Objects/groundstation.crf
-Objects/main.crf
-Objects/nvic.crf
 *.crf
+DebugConfig/Target_1_STM32F103C8_1.0.0.dbgconf
+Listings/startup_stm32f10x_md.lst
+RTE/_Target_1/RTE_Components.h
+VTOL_MW.uvoptx
