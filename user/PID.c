@@ -56,9 +56,9 @@ void parameterInit()
     roll.outer.Output = 0;
     yaw.outer.Output = 0;
     
-    roll.inner.P = 2.5f;   //1.5
-    roll.inner.I = 0.0f;
-    roll.inner.D = 1.5f;  //40.0
+    roll.inner.P = 3.5f;   //1.5
+    roll.inner.I = 0.01f;
+    roll.inner.D = 12.0f;  //40.0
 
     pitch.inner.P  = 5.0f;   //40.00
     pitch.inner.I = 0.0f;
@@ -68,9 +68,9 @@ void parameterInit()
     yaw.inner.I = 0.0f;
     yaw.inner.D = 5.0f;
 
-    roll.outer.P = 2.5f;  //-2.0
-    roll.outer.I = 0.0f;   //-0.01
-    roll.outer.D = 2.0f;  //0.0
+    roll.outer.P = 1.0f;  //-2.0
+    roll.outer.I = 0.01f;   //-0.01
+    roll.outer.D = 1.8f;  //0.0
     
     pitch.outer.P = 10.0f;    //1.0
     pitch.outer.I = 0.01f;
@@ -97,13 +97,16 @@ void parameterInit()
     Mode = Stabilze;  //默认增稳模式
     
     setCalibration(3);  //气压高度置0
-    
-    GravityAcc = getGravityAcc();
+
+  
     PID_Set(&(barAltHoldHeight), 0, 0, 0, 0.5,2000, 1000.0); //±0.5米内积分
     PID_Set(&(barAltHoldRate),0,0,0,1.0,2000,1000.0);
     
    
-    yaw_desire=getYawToward(); //得到当前朝向角度
+   // yaw_desire=getYawToward(); //得到当前朝向角度
+    
+    setOpenGPS();
+    setGPSBaud(9600);
    
 
 }

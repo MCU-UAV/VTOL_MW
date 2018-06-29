@@ -300,6 +300,9 @@ uint8_t setMagOffset(void)
 //功能：设置D0,D1连接GPS
 void setOpenGPS(void)
 {
+    u8 buff[1] = {0x05};
+     MoniI2c_WriteSomeDataToSlave(IMUREADADDR, D1MODE, 1, buff);
+    
 }
 
 //16.
@@ -307,6 +310,9 @@ void setOpenGPS(void)
 //参数：波特率
 void setGPSBaud(uint16_t GPSBaud)
 {
+    u8 buff[1];
+    buff[0] = GPSBaud;
+     MoniI2c_WriteSomeDataToSlave(IMUREADADDR, GPSBAUD, 1, buff);
 }
 
 //18.

@@ -392,7 +392,7 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 根据通讯协议将发送姿态角，高度数据，飞行模式，是否锁定信息
 打包，并发送给上位机
 **************************************************************/
-void ANO_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 alt, u8 fly_model, u8 armed)
+void ANO_DT_Send_Status(float angle_pit, float angle_rol, float angle_yaw, s32 alt, u8 fly_model, u8 armed)
 {
 	u8 _cnt=0;
 	vs16 _temp;

@@ -168,5 +168,7 @@ void getGyro(IMUdata *gg);
 void getMag(IMUdata *mm);
 void getAcc(IMUdata *aa);
 void setCalibration(uint8_t setState);
+void setOpenGPS(void);
+void setGPSBaud(uint16_t GPSBaud);
 #endif
 

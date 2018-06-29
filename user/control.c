@@ -93,13 +93,13 @@ void Control(void)  //200HZ
     //按照图意 X轴为升降 Y轴为横滚 Z轴为偏航
     if(loop_cnt % 2 )    //100hz
     {
-        
+
         FlightStateTask(0.1);//10ms执行一次  进行飞机锁定与加锁状态
         FlightTask(CHdata[AUX1], 1); //飞行模式   取反变为-1 自稳/定高
-        ModeTask(CHdata[AUX2], -1); //飞机姿态 取反变为-1  垂直/水平      
-        
-        
-       
+        ModeTask(CHdata[AUX2], -1); //飞机姿态 取反变为-1  垂直/水平
+
+
+
         if(myabs(CHdata[AIL] - remote_normal_value) <= remote_dead_zone) CHdata[AIL] = remote_normal_value; //副翼死区设置
         if(myabs(CHdata[ELE] - remote_normal_value) <= remote_dead_zone) CHdata[ELE] = remote_normal_value; //升降死区设置
         if(myabs(CHdata[RUD] - remote_normal_value) <= remote_dead_zone) CHdata[RUD] = remote_normal_value; //方向死区设置
@@ -109,32 +109,33 @@ void Control(void)  //200HZ
             //外环PID计算
 
             //ROLL 外环 X轴
-            PID_Set(&(roll.outer), limf( (CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, -ang.Y, 5.0,45.0 ,1000.0);
+            PID_Set(&(roll.outer), limf( -(CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, -ang.Y, 5.0, 45.0 , 1000.0);
             roll.outer.Output = PID_Postion_Cal(&(roll.outer));
             //PITCH 外环 X轴
-            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 0, ang.X, 5.0,45.0, 1000.0);
+            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 0, ang.X, 5.0, 45.0, 1000.0);
             pitch.outer.Output = PID_Postion_Cal(&(pitch.outer));
             //YAW 外环
-            PID_Set(&(yaw.outer),yaw_desire,0, ang.Z, 5.0,45.0 , 500.0);
+            yaw_desire = CHdata[RUD] - remote_normal_value + ang.Z;
+            if(yaw_desire > 180) yaw_desire -= 360;
+            if(yaw_desire < -180) yaw_desire += 360;
+            PID_Set(&(yaw.outer), yaw_desire, 0, ang.Z, 5.0, 45.0 , 1000.0);
             yaw.outer.Output = PID_Postion_Cal(&(yaw.outer));
-            yaw_desire += (-(CHdata[RUD] - remote_normal_value) / 2.5) * 0.005;
-            if(yaw_desire >= 180) yaw_desire -=360;
-            
-            else if(yaw_desire <= 180) yaw_desire +=360;
+
+
             if(FlightMode == AltHold)
             {
-            getAddData(&add); //得到气压、气压高度、GPS相关数据
-           
-            AltDataDeal(); //计算 Z轴速度测量量 ， Z轴高度测量量
-            
-            barAltHeightOut = PID_Postion_Cal(&barAltHoldHeight);    //高度环计算
-            barAltHoldRate.Desire = barAltHeightOut;              //高度环输出为速度环输入
-            barAltRateOut = PID_Postion_Cal(&barAltHoldRate);      //速度环输入
-                
-            AltHoldChange();
+                getAddData(&add); //得到气压、气压高度、GPS相关数据
+
+                AltDataDeal(); //计算 Z轴速度测量量 ， Z轴高度测量量
+
+                barAltHeightOut = PID_Postion_Cal(&barAltHoldHeight);    //高度环计算
+                barAltHoldRate.Desire = barAltHeightOut;              //高度环输出为速度环输入
+                barAltRateOut = PID_Postion_Cal(&barAltHoldRate);      //速度环输入
+
+                AltHoldChange();
             }
-            
-            
+
+
         }
         else if(Mode == Aero)
         {
@@ -149,15 +150,15 @@ void Control(void)  //200HZ
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //内环PID  200HZ
 
-    PID_Set(&(roll.inner), roll.outer.Output, 0, gyro.Y, 50.0,200.0, 1000.0); //ROLL 内环 Z轴
+    PID_Set(&(roll.inner), roll.outer.Output, 0, -gyro.Y, 50.0, 200.0, 1000.0); //ROLL 内环 Z轴
     roll.inner.Output = PID_Postion_Cal(&(roll.inner));
 
-    PID_Set(&(pitch.inner), pitch.outer.Output, 0, gyro.X, 50.0,200.0 ,1000.0); //PITCH 内环 X轴
+    PID_Set(&(pitch.inner), pitch.outer.Output, 0, gyro.X, 50.0, 200.0 , 1000.0); //PITCH 内环 X轴
     pitch.inner.Output = PID_Postion_Cal(&(pitch.inner));
 
-    PID_Set(&(yaw.inner), yaw.outer.Output,0, gyro.Z, 50.0, 200.0 ,1000.0); //YAW 内环 Y轴
+    PID_Set(&(yaw.inner), yaw.outer.Output, 0, gyro.Z, 50.0, 200.0 , 1000.0); //YAW 内环 Y轴
     yaw.inner.Output = PID_Postion_Cal(&(yaw.inner));
-     
+
 
 
 
@@ -171,17 +172,17 @@ void Control(void)  //200HZ
         if(FlightMode == Stabilze)
         {
 
-        PWM1 = CHdata[THR] - 100 + roll.inner.Output ;
-        PWM2 = CHdata[THR] - 100 - roll.inner.Output;
-        PWM3 = 1500  + (+ pitch.inner.Output ) * 0.5 + (+yaw.inner.Output) * 0.5;
-        PWM4 = 1500  + (+ pitch.inner.Output ) * 0.5 + (-yaw.inner.Output) * 0.5;
+            PWM1 = CHdata[THR] - 100 + roll.inner.Output ;
+            PWM2 = CHdata[THR] - 100 - roll.inner.Output;
+            PWM3 = 1500  + (+ pitch.inner.Output ) * 0.5 + (+yaw.inner.Output) * 0.5;
+            PWM4 = 1500  + (+ pitch.inner.Output ) * 0.5 + (-yaw.inner.Output) * 0.5;
         }
         else if(FlightMode == AltHold)
         {
-         PWM1 = altTHR - 100 + roll.inner.Output ;
-        PWM2 = altTHR - 100 - roll.inner.Output;
-        PWM3 = 1500  + (+ pitch.inner.Output ) * 0.5 + (+yaw.inner.Output) * 0.5;
-        PWM4 = 1500  + (+ pitch.inner.Output ) * 0.5 + (-yaw.inner.Output) * 0.5;
+            PWM1 = altTHR - 100 + roll.inner.Output ;
+            PWM2 = altTHR - 100 - roll.inner.Output;
+            PWM3 = 1500  + (+ pitch.inner.Output ) * 0.5 + (+yaw.inner.Output) * 0.5;
+            PWM4 = 1500  + (+ pitch.inner.Output ) * 0.5 + (-yaw.inner.Output) * 0.5;
         }
     }
     else if(Mode == Aero)//固定翼状态
@@ -211,7 +212,7 @@ void Control(void)  //200HZ
     }
     else if(CHdata[THR] < throttle_low_dead_value && State == DisArmed)  //油门杆在下面且 解锁了，此时怠速
     {
-        PWM1 = motor_idle_throttle;  
+        PWM1 = motor_idle_throttle;
         PWM2 = motor_idle_throttle;
         MOTO1_SetPulse(PWM1)   ;  //怠速油门
         MOTO2_SetPulse(PWM2)   ;
@@ -223,7 +224,7 @@ void Control(void)  //200HZ
     }
     else if(State == DisArmed)  //正常飞行
     {
-   
+
         MOTO1_SetPulse(PWM1)   ;
         MOTO2_SetPulse(PWM2)   ;
         SERVO1_SetPulse(3000 - PWM3)  ;

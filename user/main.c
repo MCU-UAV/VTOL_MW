@@ -27,6 +27,7 @@
 //注意：定高部分虽然修改，但仍未测试
 
 
+// GPS SCL 橙色 CDA 黄色 TX 白色 RX 绿色
 int main(void)
 {
    uint16_t i,j;
@@ -78,7 +79,7 @@ int main(void)
 	while(1)
     {
         
-          delay_ms(10);
+          delay_ms(100);
         /***地面站数据***/
             ANO_DT_Data_Exchange(); //地面站数据发送/接收
         /***基础数据***/

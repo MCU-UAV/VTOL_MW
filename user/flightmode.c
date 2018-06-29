@@ -32,6 +32,9 @@ void go_disarm()
     }
     else if(State == DisArmed)
     {
+            
+        GravityAcc = getGravityAcc();  //得到重力加速度
+        
         //do something
     }
 }
