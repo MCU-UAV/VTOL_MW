@@ -50,7 +50,7 @@ s16 ready_cnt = 0;
 
 void FlightStateTask(float T)
 {
-    if( CHdata[2] < 1200 ) //油门控制信号小于1200
+    if( CHdata[2] < 1300 ) //油门控制信号小于1200
     {
         if( !State && ready_cnt != -1 ) //解锁完成，且已退出解锁上锁过程
         {
@@ -58,12 +58,12 @@ void FlightStateTask(float T)
         }
         /* 内八解锁方式*/
 
-        if( CHdata[0] < 1200 )
+        if( CHdata[0] < 1300 )
         {
 
-            if( CHdata[1] < 1200 )
+            if( CHdata[1] < 1300 )
 
-                if( CHdata[3] > 1700 )
+                if( CHdata[3] < 1300 )
 
                     if( ready_cnt != -1 )	//内八满足且退出解锁上锁过程，防止连续切换
 

@@ -5,5 +5,6 @@
 #include "stdio.h"
 
 void USART_Config(void);
+void  dataTranConfig(void);
 
 #endif

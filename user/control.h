@@ -8,7 +8,7 @@
 #define remote_dead_zone 10     //遥控器各回中通道中立点死区范围 单位 ：ms
 #define remote_normal_value 1500 //遥控器各回中通道中立点数值 单位：ms
 #define motor_idle_throttle 1250 //电机怠速油门
-#define throttle_low_dead_value  1200
+#define throttle_low_dead_value  1300
 #define motor_min_throttle 1100
 
 #define AIL 0  //横滚

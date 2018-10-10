@@ -9,7 +9,7 @@ PID控制核心算法
 #include "i2c_soft.h"
 #include "nvic.h"
 #include "pwm.h"
-#include "systick.h"
+#include "delay.h"
 #include "queue.h"
 #include "filter.h"
 #include "rc.h"
@@ -109,16 +109,16 @@ void Control(void)  //200HZ
             //外环PID计算
 
             //ROLL 外环 X轴
-            PID_Set(&(roll.outer), limf( -(CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, -ang.Y, 5.0, 45.0 , 1000.0);
+            PID_Set(&(roll.outer), limf( -(CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, -ang.Y, 5.0, 45.0 , 10000.0);
             roll.outer.Output = PID_Postion_Cal(&(roll.outer));
             //PITCH 外环 X轴
-            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 0, ang.X, 5.0, 45.0, 1000.0);
+            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 0, ang.X, 5.0, 45.0, 10000.0);
             pitch.outer.Output = PID_Postion_Cal(&(pitch.outer));
             //YAW 外环
             yaw_desire = CHdata[RUD] - remote_normal_value + ang.Z;
             if(yaw_desire > 180) yaw_desire -= 360;
             if(yaw_desire < -180) yaw_desire += 360;
-            PID_Set(&(yaw.outer), yaw_desire, 0, ang.Z, 5.0, 45.0 , 1000.0);
+            PID_Set(&(yaw.outer), yaw_desire, 0, ang.Z, 5.0, 45.0 , 10000.0);
             yaw.outer.Output = PID_Postion_Cal(&(yaw.outer));
 
 
@@ -139,7 +139,7 @@ void Control(void)  //200HZ
         }
         else if(Mode == Aero)
         {
-            printf("Flight State is ERROR!\n");
+            printf("Flight State is ERROR! Aero \n");
             // roll.outer.Output = PID_Postion_Cal(&(roll.outer), (CHdata[AIL] - remote_normal_value) / 25.0f , ang.Y, 0, angle_max);      //外环PID计算
             //oll.outer.Output = PID_Postion_Cal(&(roll.outer),limf( (CHdata[AIL] - remote_normal_value) / 30.0f, -200.0, 200.0 ), ang.Y, 0, angle_max);
             // pitch.outer.Output = PID_Postion_Cal(&(pitch.outer), (CHdata[ELE] - remote_normal_value) / 25.0f, ang.X, 0, angle_max);
@@ -149,14 +149,14 @@ void Control(void)  //200HZ
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //内环PID  200HZ
-
-    PID_Set(&(roll.inner), roll.outer.Output, 0, -gyro.Y, 50.0, 200.0, 1000.0); //ROLL 内环 Z轴
+    //PID_Set(PID_DATA *data, float Input, float Desire, float Measure, float IntDifZone, float Integral_max,float OutLim)
+    PID_Set(&(roll.inner), roll.outer.Output, 0, -gyro.Y, 150.0, 1000.0, 1000.0); //ROLL 内环 Z轴
     roll.inner.Output = PID_Postion_Cal(&(roll.inner));
 
-    PID_Set(&(pitch.inner), pitch.outer.Output, 0, gyro.X, 50.0, 200.0 , 1000.0); //PITCH 内环 X轴
+    PID_Set(&(pitch.inner), pitch.outer.Output, 0, gyro.X, 150.0, 1000.0 , 1000.0); //PITCH 内环 X轴
     pitch.inner.Output = PID_Postion_Cal(&(pitch.inner));
 
-    PID_Set(&(yaw.inner), yaw.outer.Output, 0, gyro.Z, 50.0, 200.0 , 1000.0); //YAW 内环 Y轴
+    PID_Set(&(yaw.inner), yaw.outer.Output, 0, -gyro.Z, 150.0, 1000.0 , 1000.0); //YAW 内环 Y轴
     yaw.inner.Output = PID_Postion_Cal(&(yaw.inner));
 
 
@@ -197,8 +197,8 @@ void Control(void)  //200HZ
     PWM2  = limf(PWM2, 1100, 1950);
     PWM3  = limf(PWM3, 1000, 2000);
     PWM4  = limf(PWM4, 1000, 2000);
-    if(myabs(PWM3 - lastPWM3) < 20)   PWM3 = lastPWM3; //舵机去抖动
-    if(myabs(PWM4 - lastPWM4) < 20)   PWM4 = lastPWM4;
+    if(myabs(PWM3 - lastPWM3) < 50)   PWM3 = lastPWM3; //舵机去抖动
+    if(myabs(PWM4 - lastPWM4) < 50)   PWM4 = lastPWM4;
 
     if(State == Armed)  //锁定状态
     {
@@ -206,18 +206,19 @@ void Control(void)  //200HZ
         PWM2 = motor_min_throttle;
         MOTO1_SetPulse(PWM1)   ;   //油门最低
         MOTO2_SetPulse(PWM2)   ;
-        SERVO1_SetPulse(3000 - PWM3)  ;
-        SERVO2_SetPulse(PWM4)  ;
+        SERVO1_SetPulse(PWM3)  ;
+        SERVO2_SetPulse(3000-PWM4)  ;
 
     }
     else if(CHdata[THR] < throttle_low_dead_value && State == DisArmed)  //油门杆在下面且 解锁了，此时怠速
     {
+        
         PWM1 = motor_idle_throttle;
         PWM2 = motor_idle_throttle;
         MOTO1_SetPulse(PWM1)   ;  //怠速油门
         MOTO2_SetPulse(PWM2)   ;
-        SERVO1_SetPulse(3000 - PWM3)  ;
-        SERVO2_SetPulse(PWM4)  ;
+        SERVO1_SetPulse(PWM3)  ;
+        SERVO2_SetPulse(3000-PWM4)  ;
         SafeTask();   //解锁5秒后无动作重新锁定
 
 
@@ -227,8 +228,8 @@ void Control(void)  //200HZ
 
         MOTO1_SetPulse(PWM1)   ;
         MOTO2_SetPulse(PWM2)   ;
-        SERVO1_SetPulse(3000 - PWM3)  ;
-        SERVO2_SetPulse(PWM4)  ;
+        SERVO1_SetPulse(PWM3)  ;
+        SERVO2_SetPulse(3000-PWM4)  ;
     }
 
 

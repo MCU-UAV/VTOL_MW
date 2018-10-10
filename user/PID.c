@@ -26,7 +26,7 @@ float PID_Postion_Cal( PID_DATA *data)
     else  Index = 0;
     if(data->Integral > data->Integral_max) data->Integral = data->Integral_max;   //积分限幅
     if(data->Integral < -data->Integral_max) data->Integral = -data->Integral_max;
-    if(CHdata[THR] < 1200) data->Integral = 0;   //油门低位 ，积分清零
+    if(CHdata[THR] < throttle_low_dead_value) data->Integral = 0;   //油门低位 ，积分清零
     data->lastError = data->error;   //保存本次误差
     data->Output =  data->P * data->error +  Index * data->I *  data->Integral +  data->D *  data->Diff;  //计算
     return limf( data->Output , -data->OutLim, data->OutLim);  //限制
@@ -81,13 +81,13 @@ void parameterInit()
     yaw.outer.I = 0.0f;
     yaw.outer.D = 0.0f;
     
-    barAltHoldHeight.P = 100.0;
+    barAltHoldHeight.P = 20.0;
     barAltHoldHeight.I = 0.0;
-    barAltHoldHeight.D = 0.0;
+    barAltHoldHeight.D = 1.0;
     
-    barAltHoldRate.P = 100.0;
-    barAltHoldRate.I = 0.0;
-    barAltHoldRate.D = 0.0;
+    barAltHoldRate.P = 20.0;
+    barAltHoldRate.I = 1.0;
+    barAltHoldRate.D = 1.0;
     
     lastgg.X = 0;
     lastgg.Y = 0;
@@ -98,15 +98,15 @@ void parameterInit()
     
     setCalibration(3);  //气压高度置0
 
-  
-    PID_Set(&(barAltHoldHeight), 0, 0, 0, 0.5,2000, 1000.0); //±0.5米内积分
+     //PID_Set(PID_DATA *data, float Input, float Desire, float Measure, float IntDifZone, float Integral_max,float OutLim)
+    PID_Set(&(barAltHoldHeight), 0, 0, 0, 50,2000, 100000.0); //±0.5米内积分
     PID_Set(&(barAltHoldRate),0,0,0,1.0,2000,1000.0);
     
-   
+    GravityAcc = getGravityAcc();
    // yaw_desire=getYawToward(); //得到当前朝向角度
     
     setOpenGPS(); //设置模块打开GPS
-    setGPSBaud(9600);  //设置模块与GPS的通信波特率
+    setGPSBaud(4800);  //设置模块与GPS的通信波特率
    
 
 }

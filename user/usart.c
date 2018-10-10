@@ -60,7 +60,22 @@ void USART_Config(void)
 	USART_ITConfig(USART, USART_IT_RXNE, ENABLE);//开启串口接受中断
 	USART_Cmd(USART,ENABLE);
 	
+    //dataTranConfig();   //唤醒数传模块
 }	
+
+void  dataTranConfig(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;//定义结构体变量
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能GPIOB的时钟
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;                    //指定引脚1
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;        //设置输出速率50MHz
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;        //推挽输出模式
+    GPIO_Init(GPIOB, &GPIO_InitStructure);                            //初始化外设GPIOB寄存器
+    
+    GPIO_SetBits(GPIOB, GPIO_Pin_1); //唤醒数传
+}
 
 //内部调用函数，注意要勾选OPTIONS中的USE Micro LIB选项
 int fputc(int ch,FILE *f)

@@ -5,7 +5,7 @@
 #include "i2c_soft.h"
 #include "nvic.h"
 #include "pwm.h"
-#include "systick.h"
+#include "delay.h"
 #include "control.h"
 #include "queue.h"
 #include "filter.h"
@@ -18,23 +18,24 @@
 #include "altHold.h"
 #include "flightmode.h"
 
-//存在问题：delay函数无效，有一定几率卡死，原因未知
-//完成：PPM,Gyro,Angle,气压高度等值的读取，PID双环控制算法，四组PWM输出，系统总运行逻辑
 
-//2018.6.5.15.10更新日志：
+
+
+//2018.10.10  更新日志：
 //1.修改了一系列BUG
-//2.支持部分数据的SerialChart查看方式
-//注意：定高部分虽然修改，但仍未测试
+//2.支持定高
+//3.修复了yaw轴方向控制方向相反的问题
+//4.更改了外环PID的输出限制
 
 
 // GPS SCL 橙色 CDA 黄色 TX 白色 RX 绿色
 int main(void)
 {
-  
+
    //串口初始化
 	USART_Config();
-	printf("usart is ready\r\n");
-	printf ("TX->B10  RX->B11\n");
+	printf("\nusart is ready\r\n");
+	printf ("TX->B11  RX->B10\n");
     
     
          
@@ -42,15 +43,12 @@ int main(void)
 	NVIC_PriorityConfig();
 	printf("NVIC is ready\r\n");
     
-     //部署延时函数
-    delay_init ();
-    printf("SysTick is ready\r\n");
-    
+   
 	  
 	//初始化模拟I2C
 	I2C_MoniConfig();
 	printf("I2C is ready!\n");
-    printf("SCL->B3  SDA->B4");
+    printf("SCL->B14  SDA->B15\n");
     
     ///参数初始化
     parameterInit();
@@ -79,18 +77,24 @@ int main(void)
 	while(1)
     {
         
-          delay_ms(100);
+          delay_ms(1);
+          
+        
+          
         /***地面站数据***/
-            ANO_DT_Data_Exchange(); //地面站数据发送/接收
+           ANO_DT_Data_Exchange(); //地面站数据发送/接收
         /***基础数据***/
         //1.三轴加速度
-        // printf("%.2f,%.2f,%.2f\n",acc.X,acc.Y,acc.Z);
+         //printf("%.2f,%.2f,%.2f\n",acc.X,acc.Y,acc.Z);
         
         //2.三轴角速度
         //printf("%.2f,%.2f,%.2f\n",gyro.X,gyro.Y,gyro.Z);
         
         //3.三轴罗盘
         //printf("%.2f,%.2f,%.2f\n",mag.X,mag.Y,mag.Z);
+        
+        //4.三轴角度
+        //printf("%.2f,%2f,%.2f\n",ang.X,ang.Y,ang.Z);
         
         /***定高相关***/
         //当前重力加速度  z轴加速度（减去重力）定高输出油门
@@ -101,6 +105,8 @@ int main(void)
         
         //高度测量值 速度测量值 定高高度环输出 定高速度环输出
         //printf("%.2f,%.2f,%.2f,%.2f\n", barAltHoldHeight.Measure,barAltHoldRate.Measure,barAltHeightOut,barAltRateOut);
+        
+       // printf("%.2f,%.2f,%.2f\n",add.SN,add.Lat,add.Lon);
         
     }
 

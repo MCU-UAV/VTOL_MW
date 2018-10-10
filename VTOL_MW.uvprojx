@@ -417,11 +417,6 @@
               <FilePath>.\user\RC.c</FilePath>
             </File>
             <File>
-              <FileName>systick.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\user\systick.c</FilePath>
-            </File>
-            <File>
               <FileName>filter.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\user\filter.c</FilePath>
@@ -455,6 +450,11 @@
               <FileName>altHold.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\user\altHold.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\user\delay.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -32,7 +32,7 @@ void NVIC_PriorityConfig(void)
 
     NVIC_initStructure3.NVIC_IRQChannel = TIM3_IRQn;
     NVIC_initStructure3.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_initStructure3.NVIC_IRQChannelSubPriority = 0;
+    NVIC_initStructure3.NVIC_IRQChannelSubPriority = 1;
     NVIC_initStructure3.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_initStructure3);
 
@@ -45,7 +45,7 @@ void NVIC_PriorityConfig(void)
     
     NVIC_initStructure1.NVIC_IRQChannel = USART3_IRQn;
 	NVIC_initStructure1.NVIC_IRQChannelPreemptionPriority=0;
-	NVIC_initStructure1.NVIC_IRQChannelSubPriority = 1;		
+	NVIC_initStructure1.NVIC_IRQChannelSubPriority = 2;		
 	NVIC_initStructure1.NVIC_IRQChannelCmd = ENABLE;			
 	NVIC_Init(&NVIC_initStructure1);	
   

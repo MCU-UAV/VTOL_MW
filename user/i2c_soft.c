@@ -8,17 +8,17 @@
 1.初始化I2C_MoniConfig()函数前，请先初始化SysTick_init()，以便可以使用延迟函数
 ************************************************************************/
 #include "i2c_soft.h"
-#include "systick.h"
+#include "delay.h"
 #include "usart.h"
 #include "stdio.h"
 /************************************************************************
 代码移植修改区
 只需要修改模拟I2C使用的是使用的的端口和SCL/SDA引脚即可
 ************************************************************************/
-#define I2C_PORT 				GPIOC
+#define I2C_PORT 				GPIOB
 #define I2C_SCL 				GPIO_Pin_14
 #define I2C_SDA 				GPIO_Pin_15
-#define RCC_I2C_PORT 			RCC_APB2Periph_GPIOC
+#define RCC_I2C_PORT 			RCC_APB2Periph_GPIOB
 /***********************************************************************/
 
 //控制管脚输出高低电平
@@ -41,7 +41,7 @@ void I2C_MoniConfig(void){
 	RCC_APB2PeriphClockCmd(RCC_I2C_PORT,ENABLE);
 	
 	GPIO_initStruct.GPIO_Pin = I2C_SCL|I2C_SDA;
-	GPIO_initStruct.GPIO_Mode = GPIO_Mode_Out_OD;		//必须为通用开漏输出
+	GPIO_initStruct.GPIO_Mode = GPIO_Mode_Out_OD;		//必须为通用开漏输出GPIO_Mode_Out_OD][[
 	GPIO_initStruct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(I2C_PORT,&GPIO_initStruct);
 	

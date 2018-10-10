@@ -41,10 +41,10 @@ void ANO_DT_Data_Exchange(void)
 {
 	static u8 cnt = 0;
 	static u8 senser_cnt 	= 10;
-	static u8 status_cnt 	= 15;
-	static u8 rcdata_cnt 	= 20;
-	static u8 motopwm_cnt	= 20;
-    static u8 alt_cnt      = 25;
+	static u8 status_cnt 	= 20;
+	static u8 rcdata_cnt 	= 25;
+	static u8 motopwm_cnt	= 30;
+    static u8 alt_cnt      = 35;
     static u8 gps_cnt = 40;
 	static u8 power_cnt		= 50;
 	//输出陀螺仪、加速计、电子罗盘各轴数据，以及roll,pitch，垂直方向的速度

@@ -3,10 +3,10 @@
 #include "imuAPI.h"
 #include "usart.h"
 #include "math.h"
-#include "systick.h"
+#include "delay.h"
 #define IMUREADADDR  0x50
 #define GRAVITY 9.8f
-#define AerFa 0.5
+#define AerFa 0.99
 IMUdata lastgg;
 float GravityAcc; //重力加速度
 /********************************************************
@@ -313,6 +313,8 @@ void setGPSBaud(uint16_t GPSBaud)
     u8 buff[1];
     buff[0] = GPSBaud;
      MoniI2c_WriteSomeDataToSlave(IMUREADADDR, GPSBAUD, 1, buff);
+     buff[0] = 0x00;
+     MoniI2c_WriteSomeDataToSlave(IMUREADADDR, SAVE , 1, buff);
 }
 
 //18.
