@@ -95,8 +95,8 @@ void Control(void)  //200HZ
     {
 
         FlightStateTask(0.1);//10ms执行一次  进行飞机锁定与加锁状态
-        FlightTask(CHdata[AUX1], 1); //飞行模式   取反变为-1 自稳/定高
-        ModeTask(CHdata[AUX2], -1); //飞机姿态 取反变为-1  垂直/水平
+        FlightTask(CHdata[AUX1] , 1); //飞行模式   取反变为-1 自稳/定高
+        ModeTask(CHdata[AUX2] , -1); //飞机姿态 取反变为-1  垂直/水平
 
 
 
@@ -109,16 +109,17 @@ void Control(void)  //200HZ
             //外环PID计算
 
             //ROLL 外环 X轴
-            PID_Set(&(roll.outer), limf( -(CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, -ang.Y, 5.0, 45.0 , 10000.0);
+            PID_Set(&(roll.outer), limf( -(CHdata[AIL] - remote_normal_value) / 30.0f, -16.0, 16.0 ), 0, -ang.Y, 5.0, 100.0 , 10000.0);
             roll.outer.Output = PID_Postion_Cal(&(roll.outer));
             //PITCH 外环 X轴
-            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 0, ang.X, 5.0, 45.0, 10000.0);
+            PID_Set(&(pitch.outer), limf(- (CHdata[ELE] - remote_normal_value) / 25.0f, -20.0, 20.0), 0, ang.X, 5.0, 100.0, 10000.0);
             pitch.outer.Output = PID_Postion_Cal(&(pitch.outer));
-            //YAW 外环
-            yaw_desire = CHdata[RUD] - remote_normal_value + ang.Z;
+            //YAW 外环  限制在 ±10 度左右
+            yaw_desire = (CHdata[RUD] - remote_normal_value) / 50.0f + ang.Z;
             if(yaw_desire > 180) yaw_desire -= 360;
             if(yaw_desire < -180) yaw_desire += 360;
-            PID_Set(&(yaw.outer), yaw_desire, 0, ang.Z, 5.0, 45.0 , 10000.0);
+            PID_Set(&(yaw.outer), 0 ,yaw_desire, ang.Z , 5.0, 100.0 , 10000.0);
+            //PID_Set(PID_DATA *data, float Input, float Desire, float Measure, float IntDifZone, float Integral_max,float OutLim)
             yaw.outer.Output = PID_Postion_Cal(&(yaw.outer));
 
 
@@ -139,7 +140,7 @@ void Control(void)  //200HZ
         }
         else if(Mode == Aero)
         {
-            printf("Flight State is ERROR! Aero \n");
+           
             // roll.outer.Output = PID_Postion_Cal(&(roll.outer), (CHdata[AIL] - remote_normal_value) / 25.0f , ang.Y, 0, angle_max);      //外环PID计算
             //oll.outer.Output = PID_Postion_Cal(&(roll.outer),limf( (CHdata[AIL] - remote_normal_value) / 30.0f, -200.0, 200.0 ), ang.Y, 0, angle_max);
             // pitch.outer.Output = PID_Postion_Cal(&(pitch.outer), (CHdata[ELE] - remote_normal_value) / 25.0f, ang.X, 0, angle_max);
@@ -197,8 +198,8 @@ void Control(void)  //200HZ
     PWM2  = limf(PWM2, 1100, 1950);
     PWM3  = limf(PWM3, 1000, 2000);
     PWM4  = limf(PWM4, 1000, 2000);
-    if(myabs(PWM3 - lastPWM3) < 50)   PWM3 = lastPWM3; //舵机去抖动
-    if(myabs(PWM4 - lastPWM4) < 50)   PWM4 = lastPWM4;
+    //if(myabs(PWM3 - lastPWM3) < 5)   PWM3 = lastPWM3; //舵机去抖动
+    //if(myabs(PWM4 - lastPWM4) < 5)   PWM4 = lastPWM4;
 
     if(State == Armed)  //锁定状态
     {

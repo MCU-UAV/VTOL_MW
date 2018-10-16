@@ -44,9 +44,9 @@ void PID_Set(PID_DATA *data, float Input, float Desire, float Measure, float Int
 
 void parameterInit()
 {
-    pitch.outer.correct = 0;
-    roll.outer.correct = 0;
-    yaw.outer.correct = 0;
+    pitch.outer.correct = 0.0;
+    roll.outer.correct = 0.0;
+    yaw.outer.correct = 0.0;
 
     pitch.inner.correct = 0;
     roll.inner.correct = 0;
@@ -56,28 +56,28 @@ void parameterInit()
     roll.outer.Output = 0;
     yaw.outer.Output = 0;
     
-    roll.inner.P = 3.5f;   //1.5
-    roll.inner.I = 0.01f;
-    roll.inner.D = 12.0f;  //40.0
+    roll.inner.P = 0.1f;   
+    roll.inner.I = 0.0f;
+    roll.inner.D = 0.01f;  
 
-    pitch.inner.P  = 5.0f;   //40.00
+    pitch.inner.P  = 0.1f;   
     pitch.inner.I = 0.0f;
-    pitch.inner.D = 10.0f;
+    pitch.inner.D = 0.01f;
     
     yaw.inner.P = 10.0f;
     yaw.inner.I = 0.0f;
     yaw.inner.D = 5.0f;
 
-    roll.outer.P = 1.0f;  //-2.0
-    roll.outer.I = 0.01f;   //-0.01
-    roll.outer.D = 1.8f;  //0.0
+    roll.outer.P = 2.0f;
+    roll.outer.I = 0.0f;   
+    roll.outer.D = 0.0f;  
     
-    pitch.outer.P = 10.0f;    //1.0
+    pitch.outer.P = 2.0f;    
     pitch.outer.I = 0.01f;
-    pitch.outer.D = 20.0f;
+    pitch.outer.D = 0.0f;
   
 
-    yaw.outer.P = 0.0f;
+    yaw.outer.P = 2.0f;
     yaw.outer.I = 0.0f;
     yaw.outer.D = 0.0f;
     

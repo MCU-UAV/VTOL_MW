@@ -92,12 +92,15 @@ void getGyro(IMUdata *gg)
 {
     uint8_t temp[6];
     MoniI2c_ReadSomeDataFromSlave(IMUREADADDR, GX, 6, temp);
-    gg->X = AerFa * (float)CharToShort(&temp[0]) / 32768 * 2000 + (1 - AerFa) * lastgg.X;
-    gg->Y = AerFa * (float)CharToShort(&temp[2]) / 32768 * 2000 + (1 - AerFa) * lastgg.Y;
-    gg->Z = AerFa * (float)CharToShort(&temp[4]) / 32768 * 2000 + (1 - AerFa) * lastgg.Z;
-    lastgg.X = gg->X;
-    lastgg.Y = gg->Y;
-    lastgg.Z = gg->Z;
+    gg->X = (float)CharToShort(&temp[0]) / 32768 * 2000;
+    gg->Y = (float)CharToShort(&temp[2]) / 32768 * 2000;
+    gg->Z = (float)CharToShort(&temp[4]) / 32768 * 2000;
+//    gg->X = AerFa * (float)CharToShort(&temp[0]) / 32768 * 2000 + (1 - AerFa) * lastgg.X;
+//    gg->Y = AerFa * (float)CharToShort(&temp[2]) / 32768 * 2000 + (1 - AerFa) * lastgg.Y;
+//    gg->Z = AerFa * (float)CharToShort(&temp[4]) / 32768 * 2000 + (1 - AerFa) * lastgg.Z;
+//    lastgg.X = gg->X;
+//    lastgg.Y = gg->Y;
+//    lastgg.Z = gg->Z;
 }
 
 //4.
